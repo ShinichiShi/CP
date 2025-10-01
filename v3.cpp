@@ -419,40 +419,60 @@ public:
     }
 };
 //Segment Tree for 0-based 2*ind+1 and 2*ind+2 and for 1-based 2*ind and 2*ind+1
+int operation(int a,int b){
+    return min(a,b);
+}
 class SGT{
-    vector<int> seg;
 public:
+    vector<int> seg;
     SGT(int n){
-        seg.resize(4*n+1,0);  
+        seg.resize(4*n+1);  
     }
-    void build(int ind,int low,int high,vi &arr){
+    void build(vi &arr, int n)
+    {
+        buildsegtree(0, 0, n - 1, arr);
+    }
+    void update(int n, int pos, int value)
+    {
+        updatesegtree(0, 0, n - 1, pos, value);
+    }
+    int query(int n, int l, int r)
+    {
+        return querysegtree(0, 0, n - 1, l, r);
+    }
+    void buildsegtree(int ind,int low,int high,vi &arr){
         if(low==high){
             seg[ind]=arr[low];
             return;
         }
         int mid=(low+high)/2;
-        build(2*ind+1,low,mid,arr);
-        build(2*ind+2,mid+1,high,arr);
-        seg[ind]=min(seg[2*ind+1],seg[2*ind+2]);
+        int left=2*ind+1;
+        int right=2*ind+2;
+        buildsegtree(left,low,mid,arr);
+        buildsegtree(right,mid+1,high,arr);
+        seg[ind]=operation(seg[left],seg[right]);
     }
-    int query(int ind,int low,int high,int l,int r){
+    int querysegtree(int ind,int low,int high,int l,int r){
         if(r<low or high<l) return INT_MAX;
         if(l<=low and high<=r) return seg[ind];
         int mid=(low+high)>>1;
-        int left=query(2*ind+1,low,mid,l,r);
-        int right=query(2*ind+2,mid+1,high,l,r);
-        return min(left,right);
+        int left=2*ind+1;
+        int right=2*ind+2;
+        return operation(querysegtree(left,low,mid,l,r),querysegtree(right,mid+1,high,l,r));
     }
-    void update(int ind,int low,int high,int i,int val){
+    void updatesegtree(int ind,int low,int high,int i,int val){
         if(low==high){
             seg[ind]=val;
             return;
         }
         int mid=(low+high)>>1;
-        if(i<=mid) update(2*ind+1,low,mid,i,val);
-        else update(2*ind+2,mid+1,high,i,val);
-        seg[ind]=min(seg[2*ind+1],seg[2*ind+2]);
+        int left=2*ind+1;
+        int right=2*ind+2;
+        if(i<=mid) updatesegtree(left,low,mid,i,val);
+        else updatesegtree(right,mid+1,high,i,val);
+        seg[ind]=operation(seg[left],seg[right]);
     }
+    
 };
 
 void solveQuery(vi v, int a, int b)
